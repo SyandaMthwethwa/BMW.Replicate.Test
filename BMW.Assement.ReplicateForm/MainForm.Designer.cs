@@ -1,4 +1,4 @@
-﻿namespace BMW.Assement.ReplicateForm
+﻿namespace BMW.Assessment.ReplicateForm
 {
     partial class FormReplicate
     {

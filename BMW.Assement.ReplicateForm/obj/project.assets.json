@@ -15,9 +15,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\CCI59360\\source\\testing\\BMW.Replicate.Test\\BMW.Assement.ReplicateForm\\BMW.Assement.ReplicateForm.csproj",
-      "projectName": "BMW.Assement.ReplicateForm",
-      "projectPath": "C:\\Users\\CCI59360\\source\\testing\\BMW.Replicate.Test\\BMW.Assement.ReplicateForm\\BMW.Assement.ReplicateForm.csproj",
+      "projectUniqueName": "C:\\Users\\CCI59360\\source\\testing\\BMW.Replicate.Test\\BMW.Assement.ReplicateForm\\BMW.Assessment.ReplicateForm.csproj",
+      "projectName": "BMW.Assessment.ReplicateForm",
+      "projectPath": "C:\\Users\\CCI59360\\source\\testing\\BMW.Replicate.Test\\BMW.Assement.ReplicateForm\\BMW.Assessment.ReplicateForm.csproj",
       "packagesPath": "C:\\Users\\CCI59360\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\CCI59360\\source\\testing\\BMW.Replicate.Test\\BMW.Assement.ReplicateForm\\obj\\",
       "projectStyle": "PackageReference",

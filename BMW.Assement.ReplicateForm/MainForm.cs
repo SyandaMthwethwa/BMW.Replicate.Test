@@ -1,11 +1,12 @@
-using BMW.Assement.ReplicateForm.Models;
+using BMW.Assessment.ReplicateForm.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
-namespace BMW.Assement.ReplicateForm
+namespace BMW.Assessment.ReplicateForm
 {
     public partial class FormReplicate : Form
     {
@@ -54,16 +55,19 @@ namespace BMW.Assement.ReplicateForm
 
         private void CompareDirectories(string sourceDir, string destinationDir, bool includeSubdirectories)
         {
+
             string[] files = Directory.GetFiles(sourceDir);
             string[] dirs = Directory.GetDirectories(sourceDir);
-
+            int progressMax = 0;
             foreach (string file in files)
             {
+                progressMax++;
+                StartProgressBar(progressMax);
                 string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
                 if (!File.Exists(destFile) || File.GetLastWriteTime(file) != File.GetLastWriteTime(destFile) || new FileInfo(file).Length != new FileInfo(destFile).Length)
                 {
                     File.Copy(file, destFile, true);
-                    Log($"Copied {file} to {destFile}");
+                    Log($"Copied {file} to {destFile} @ {DateTime.Now}");
                 }
             }
 
@@ -73,7 +77,7 @@ namespace BMW.Assement.ReplicateForm
                 if (!Directory.Exists(destDir))
                 {
                     Directory.CreateDirectory(destDir);
-                    Log($"Created directory: {destDir}");
+                    Log($"Created directory: {destDir} @ {DateTime.Now}");
                 }
                 CompareDirectories(dir, destDir, includeSubdirectories);
             }
@@ -125,6 +129,13 @@ namespace BMW.Assement.ReplicateForm
             {
                 destinationTextBox.Text = DestinationDirectoryBrowserDialog.SelectedPath;
             }
+        }
+
+        public void StartProgressBar(int progresMax)
+        {
+            progressBar1.Step = 1;
+            progressBar1.Maximum = Convert.ToInt32(progresMax);
+            progressBar1.PerformStep();
         }
     }
 }

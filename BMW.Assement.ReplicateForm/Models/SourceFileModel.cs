@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BMW.Assement.ReplicateForm.Models
+namespace BMW.Assessment.ReplicateForm.Models
 {
     public class SourceFileModel
     {

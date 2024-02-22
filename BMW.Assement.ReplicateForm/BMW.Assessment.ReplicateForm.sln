@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BMW.Assement.ReplicateForm", "BMW.Assement.ReplicateForm.csproj", "{4E9902DE-412F-4BEE-84A0-AF3519A6EBE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BMW.Assessment.ReplicateForm", "BMW.Assessment.ReplicateForm.csproj", "{4E9902DE-412F-4BEE-84A0-AF3519A6EBE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
