@@ -1,6 +1,7 @@
 using BMW.Assessment.ReplicateForm.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -12,6 +13,7 @@ namespace BMW.Assessment.ReplicateForm
     {
         private StringBuilder logBuilder = new StringBuilder();
         private string logFilePath = "log.txt";
+
 
         public FormReplicate()
         {
@@ -39,6 +41,7 @@ namespace BMW.Assessment.ReplicateForm
             string sourceDir = sourceTextBox.Text;
             string destinationDir = destinationTextBox.Text;
             bool includeSubdirectories = includeSubdirectoriesCheckBox.Checked;
+            
 
             if (!Directory.Exists(sourceDir) || !Directory.Exists(destinationDir))
             {
@@ -58,6 +61,11 @@ namespace BMW.Assessment.ReplicateForm
 
             string[] files = Directory.GetFiles(sourceDir);
             string[] dirs = Directory.GetDirectories(sourceDir);
+            List<string> sourceFiles = Directory.GetFiles(sourceDir).Select(Path.GetFileName).ToList();
+            List<string> destinationFiles = Directory.GetFiles(destinationDir).Select(Path.GetFileName).ToList();
+            IEnumerable<string> filesmissingfromSource = destinationFiles.Except(sourceFiles);
+
+
             int progressMax = 0;
             foreach (string file in files)
             {
@@ -71,6 +79,14 @@ namespace BMW.Assessment.ReplicateForm
                 }
             }
 
+            foreach(string file in filesmissingfromSource)
+            {
+                string filePath = Path.Combine(destinationDir, file);
+                File.Delete(filePath);
+                Log($"Non Exist File Deleted: {file} from: {filePath} @: {DateTime.Now}");
+            }
+           
+
             foreach (string dir in dirs)
             {
                 string destDir = Path.Combine(destinationDir, Path.GetFileName(dir));
@@ -82,6 +98,7 @@ namespace BMW.Assessment.ReplicateForm
                 CompareDirectories(dir, destDir, includeSubdirectories);
             }
 
+
             if (!includeSubdirectories)
             {
                 foreach (string dir in Directory.GetDirectories(destinationDir))
@@ -89,7 +106,7 @@ namespace BMW.Assessment.ReplicateForm
                     if (!dirs.Contains(dir))
                     {
                         Directory.Delete(dir, true);
-                        Log($"Deleted directory: {dir}");
+                        Log($"Deleted directory: {dir} @ {DateTime.Now}");
                     }
                 }
             }
@@ -131,7 +148,7 @@ namespace BMW.Assessment.ReplicateForm
             }
         }
 
-        public void StartProgressBar(int progresMax)
+        private void StartProgressBar(int progresMax)
         {
             progressBar1.Step = 1;
             progressBar1.Maximum = Convert.ToInt32(progresMax);
