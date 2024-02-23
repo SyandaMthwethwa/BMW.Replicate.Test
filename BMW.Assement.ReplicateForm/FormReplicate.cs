@@ -1,3 +1,4 @@
+using BMW.Assessment.ReplicateForm.Logic;
 using BMW.Assessment.ReplicateForm.Models;
 using System;
 using System.Collections.Generic;
@@ -6,28 +7,34 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using EventLog = BMW.Assessment.ReplicateForm.Logic.EventLog;
 
 namespace BMW.Assessment.ReplicateForm
 {
     public partial class FormReplicate : Form
+
     {
+        #region Global Variables
         private StringBuilder logBuilder = new StringBuilder();
         private string logFilePath = "log.txt";
-
+        #endregion
 
         public FormReplicate()
         {
             InitializeComponent();
             LoadSettings();
         }
-
+        #region Load Settings
         private void LoadSettings()
         {
             sourceTextBox.Text = Properties.Settings.Default.SourceDirectory;
             destinationTextBox.Text = Properties.Settings.Default.DestinationDirectory;
             includeSubdirectoriesCheckBox.Checked = Properties.Settings.Default.IncludeSubdirectories;
         }
+        #endregion
 
+
+        #region Save Settings For Later Use
         private void SaveSettings()
         {
             Properties.Settings.Default.SourceDirectory = sourceTextBox.Text;
@@ -35,27 +42,45 @@ namespace BMW.Assessment.ReplicateForm
             Properties.Settings.Default.IncludeSubdirectories = includeSubdirectoriesCheckBox.Checked;
             Properties.Settings.Default.Save();
         }
+        #endregion
 
+        #region Button Replicate
         private void btnReplicate_Click(object sender, EventArgs e)
         {
             string sourceDir = sourceTextBox.Text;
             string destinationDir = destinationTextBox.Text;
             bool includeSubdirectories = includeSubdirectoriesCheckBox.Checked;
-            
 
-            if (!Directory.Exists(sourceDir) || !Directory.Exists(destinationDir))
+
+            if (!Directory.Exists(sourceDir))
             {
-                MessageBox.Show("Source or destination directory does not exist.");
+                MessageBox.Show("Source directory does not exist.");
                 return;
+            }
+            if (!Directory.Exists(destinationDir) && includeSubdirectories)
+            {
+                DialogResult dialogResult = MessageBox.Show("Destination directory does not exist. Do you want to to create directory?", "Replicate Form", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    Directory.CreateDirectory(destinationDir);
+                    new EventLog().Log($"New Destination Directory Created : {destinationDir} @ {DateTime.Now}", logBuilder);
+                    includeSubdirectories = false;
+                }
+                else
+                {
+                    return;
+                }
             }
 
             logBuilder.Clear();
             CompareDirectories(sourceDir, destinationDir, includeSubdirectories);
-            Log(logBuilder.ToString());
+            new EventLog().Log(logBuilder.ToString(), logBuilder);
             SaveSettings();
             MessageBox.Show("Comparison completed. Please check the log for details.");
         }
+        #endregion
 
+        #region Comparison Method
         private void CompareDirectories(string sourceDir, string destinationDir, bool includeSubdirectories)
         {
 
@@ -63,38 +88,30 @@ namespace BMW.Assessment.ReplicateForm
             string[] dirs = Directory.GetDirectories(sourceDir);
             List<string> sourceFiles = Directory.GetFiles(sourceDir).Select(Path.GetFileName).ToList();
             List<string> destinationFiles = Directory.GetFiles(destinationDir).Select(Path.GetFileName).ToList();
-            IEnumerable<string> filesmissingfromSource = destinationFiles.Except(sourceFiles);
+            IEnumerable<string> NoneExistFilesInSource = destinationFiles.Except(sourceFiles);
 
-
-            int progressMax = 0;
+            int progressBarMaxValue = 0;
             foreach (string file in files)
             {
-                progressMax++;
-                StartProgressBar(progressMax);
-                string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
-                if (!File.Exists(destFile) || File.GetLastWriteTime(file) != File.GetLastWriteTime(destFile) || new FileInfo(file).Length != new FileInfo(destFile).Length)
-                {
-                    File.Copy(file, destFile, true);
-                    Log($"Copied {file} to {destFile} @ {DateTime.Now}");
-                }
+                progressBarMaxValue++;
+                StartProgressBar(progressBarMaxValue);
+                new Directories().CompareFile(file, destinationDir, logBuilder);
             }
 
-            foreach(string file in filesmissingfromSource)
+            foreach (string file in NoneExistFilesInSource)
             {
-                string filePath = Path.Combine(destinationDir, file);
-                File.Delete(filePath);
-                Log($"Non Exist File Deleted: {file} from: {filePath} @: {DateTime.Now}");
+                progressBarMaxValue++;
+                StartProgressBar(progressBarMaxValue);
+                new Directories().DeleteNoneExistFile(file, destinationDir, logBuilder);
             }
-           
+
 
             foreach (string dir in dirs)
             {
+                progressBarMaxValue++;
+                StartProgressBar(progressBarMaxValue);
                 string destDir = Path.Combine(destinationDir, Path.GetFileName(dir));
-                if (!Directory.Exists(destDir))
-                {
-                    Directory.CreateDirectory(destDir);
-                    Log($"Created directory: {destDir} @ {DateTime.Now}");
-                }
+                new Directories().CreateDirectoryIfNotExist(destDir, dir, logBuilder);
                 CompareDirectories(dir, destDir, includeSubdirectories);
             }
 
@@ -103,26 +120,26 @@ namespace BMW.Assessment.ReplicateForm
             {
                 foreach (string dir in Directory.GetDirectories(destinationDir))
                 {
+                    progressBarMaxValue++;
+                    StartProgressBar(progressBarMaxValue);
                     if (!dirs.Contains(dir))
                     {
                         Directory.Delete(dir, true);
-                        Log($"Deleted directory: {dir} @ {DateTime.Now}");
+                        new EventLog().Log($"Deleted directory: {dir} @ {DateTime.Now}", logBuilder);
                     }
                 }
             }
         }
+        #endregion
 
-        private void Log(string message)
-        {
-            logBuilder.AppendLine(message);
-        }
-
+        #region View Logs
         private void btnViewLog_Click(object sender, EventArgs e)
         {
-            File.WriteAllText(logFilePath, logBuilder.ToString());
-            System.Diagnostics.Process.Start("notepad.exe", logFilePath);
+            new EventLog().ViewLogs(logFilePath, logBuilder);
         }
+        #endregion
 
+        #region Browse Source Directory
         private void btnBrowseSrc_Click(object sender, EventArgs e)
         {
             var SourceDirectoryBrowserDialog = new FolderBrowserDialog();
@@ -132,12 +149,9 @@ namespace BMW.Assessment.ReplicateForm
                 sourceTextBox.Text = SourceDirectoryBrowserDialog.SelectedPath;
             }
         }
+        #endregion
 
-        private void btnExit_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
+        #region Browse Destination Directory
         private void btnBrowseDest_Click(object sender, EventArgs e)
         {
             var DestinationDirectoryBrowserDialog = new FolderBrowserDialog();
@@ -147,12 +161,36 @@ namespace BMW.Assessment.ReplicateForm
                 destinationTextBox.Text = DestinationDirectoryBrowserDialog.SelectedPath;
             }
         }
+        #endregion
 
-        private void StartProgressBar(int progresMax)
+        #region Exit Application
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+        #endregion
+
+        #region Start Progress Bar
+        public void StartProgressBar(int progresMax)
         {
             progressBar1.Step = 1;
             progressBar1.Maximum = Convert.ToInt32(progresMax);
             progressBar1.PerformStep();
         }
+        #endregion
+
+        #region Include Subdirectories Options
+        private void includeSubdirectoriesCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (includeSubdirectoriesCheckBox.Checked)
+            {
+                destinationTextBox.Enabled = true;
+            }
+            else
+            {
+                destinationTextBox.Enabled = false;
+            }
+        }
+        #endregion
     }
 }

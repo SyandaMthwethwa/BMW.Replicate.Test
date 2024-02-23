@@ -130,6 +130,7 @@
             this.includeSubdirectoriesCheckBox.TabIndex = 8;
             this.includeSubdirectoriesCheckBox.Text = "Include Sub Directories";
             this.includeSubdirectoriesCheckBox.UseVisualStyleBackColor = true;
+            this.includeSubdirectoriesCheckBox.CheckedChanged += new System.EventHandler(this.includeSubdirectoriesCheckBox_CheckedChanged);
             // 
             // progressBar1
             // 
