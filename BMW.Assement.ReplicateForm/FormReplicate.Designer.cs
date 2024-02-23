@@ -41,6 +41,7 @@
             this.sourceTextBox = new System.Windows.Forms.TextBox();
             this.destinationTextBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.donotdeleteCheck = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -157,6 +158,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.donotdeleteCheck);
             this.panel1.Controls.Add(this.destinationTextBox);
             this.panel1.Controls.Add(this.sourceTextBox);
             this.panel1.Controls.Add(this.progressBar1);
@@ -173,6 +175,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(797, 335);
             this.panel1.TabIndex = 0;
+            // 
+            // donotdeleteCheck
+            // 
+            this.donotdeleteCheck.AutoSize = true;
+            this.donotdeleteCheck.Location = new System.Drawing.Point(399, 136);
+            this.donotdeleteCheck.Name = "donotdeleteCheck";
+            this.donotdeleteCheck.Size = new System.Drawing.Size(128, 24);
+            this.donotdeleteCheck.TabIndex = 1;
+            this.donotdeleteCheck.Text = "Do Not Delete";
+            this.donotdeleteCheck.UseVisualStyleBackColor = true;
             // 
             // FormReplicate
             // 
@@ -204,5 +216,6 @@
         private TextBox sourceTextBox;
         private TextBox destinationTextBox;
         private Panel panel1;
+        private CheckBox donotdeleteCheck;
     }
 }

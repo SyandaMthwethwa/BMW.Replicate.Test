@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using EventLog = BMW.Assessment.ReplicateForm.Logic.EventLog;
 
 namespace BMW.Assessment.ReplicateForm
@@ -30,6 +31,7 @@ namespace BMW.Assessment.ReplicateForm
             sourceTextBox.Text = Properties.Settings.Default.SourceDirectory;
             destinationTextBox.Text = Properties.Settings.Default.DestinationDirectory;
             includeSubdirectoriesCheckBox.Checked = Properties.Settings.Default.IncludeSubdirectories;
+
         }
         #endregion
 
@@ -40,6 +42,7 @@ namespace BMW.Assessment.ReplicateForm
             Properties.Settings.Default.SourceDirectory = sourceTextBox.Text;
             Properties.Settings.Default.DestinationDirectory = destinationTextBox.Text;
             Properties.Settings.Default.IncludeSubdirectories = includeSubdirectoriesCheckBox.Checked;
+            Properties.Settings.Default.DoNotDeleteDirectoriesFiles = donotdeleteCheck.Checked;
             Properties.Settings.Default.Save();
         }
         #endregion
@@ -50,6 +53,8 @@ namespace BMW.Assessment.ReplicateForm
             string sourceDir = sourceTextBox.Text;
             string destinationDir = destinationTextBox.Text;
             bool includeSubdirectories = includeSubdirectoriesCheckBox.Checked;
+            bool donotdeletedirectoriesfiles = donotdeleteCheck.Checked;
+
 
 
             if (!Directory.Exists(sourceDir))
@@ -73,7 +78,7 @@ namespace BMW.Assessment.ReplicateForm
             }
 
             logBuilder.Clear();
-            CompareDirectories(sourceDir, destinationDir, includeSubdirectories);
+            CompareDirectories(sourceDir, destinationDir, includeSubdirectories, donotdeletedirectoriesfiles);
             new EventLog().Log(logBuilder.ToString(), logBuilder);
             SaveSettings();
             MessageBox.Show("Comparison completed. Please check the log for details.");
@@ -81,7 +86,7 @@ namespace BMW.Assessment.ReplicateForm
         #endregion
 
         #region Comparison Method
-        private void CompareDirectories(string sourceDir, string destinationDir, bool includeSubdirectories)
+        private void CompareDirectories(string sourceDir, string destinationDir, bool includeSubdirectories, bool donotdeletedirectoriesfiles)
         {
 
             string[] files = Directory.GetFiles(sourceDir);
@@ -95,14 +100,17 @@ namespace BMW.Assessment.ReplicateForm
             {
                 progressBarMaxValue++;
                 StartProgressBar(progressBarMaxValue);
-                new Directories().CompareFile(file, destinationDir, logBuilder);
+                new Directories().CompareFile(file, destinationDir, donotdeletedirectoriesfiles, logBuilder);
             }
 
-            foreach (string file in NoneExistFilesInSource)
+            if (!donotdeletedirectoriesfiles)
             {
-                progressBarMaxValue++;
-                StartProgressBar(progressBarMaxValue);
-                new Directories().DeleteNoneExistFile(file, destinationDir, logBuilder);
+                foreach (string file in NoneExistFilesInSource)
+                {
+                    progressBarMaxValue++;
+                    StartProgressBar(progressBarMaxValue);
+                    new Directories().DeleteNoneExistFile(file, destinationDir, logBuilder);
+                }
             }
 
 
@@ -112,11 +120,11 @@ namespace BMW.Assessment.ReplicateForm
                 StartProgressBar(progressBarMaxValue);
                 string destDir = Path.Combine(destinationDir, Path.GetFileName(dir));
                 new Directories().CreateDirectoryIfNotExist(destDir, dir, logBuilder);
-                CompareDirectories(dir, destDir, includeSubdirectories);
+                CompareDirectories(dir, destDir, includeSubdirectories, donotdeletedirectoriesfiles);
             }
 
 
-            if (!includeSubdirectories)
+            if (!includeSubdirectories && !donotdeletedirectoriesfiles)
             {
                 foreach (string dir in Directory.GetDirectories(destinationDir))
                 {

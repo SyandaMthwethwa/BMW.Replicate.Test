@@ -10,10 +10,10 @@ namespace BMW.Assessment.ReplicateForm.Logic
     public class Directories
     {
 
-        public void CompareFile(string file, string destinationDir, StringBuilder logBuilder)
+        public void CompareFile(string file, string destinationDir, bool donotdeletedirectoriesfiles, StringBuilder logBuilder)
         {
             string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
-            if (!File.Exists(destFile) || File.GetLastWriteTime(file) != File.GetLastWriteTime(destFile) || new FileInfo(file).Length != new FileInfo(destFile).Length)
+            if (donotdeletedirectoriesfiles || !File.Exists(destFile) || File.GetLastWriteTime(file) != File.GetLastWriteTime(destFile) || new FileInfo(file).Length != new FileInfo(destFile).Length)
             {
                 File.Copy(file, destFile, true);
                 new EventLog().Log($"Copied {file} to {Path.Combine(destinationDir, Path.GetFileName(file))} @ {DateTime.Now}", logBuilder);
@@ -33,7 +33,7 @@ namespace BMW.Assessment.ReplicateForm.Logic
         {
             string filePath = Path.Combine(destinationDir, file);
             File.Delete(filePath);
-            new EventLog().Log($"Non Exist File Deleted: {file} from: {Path.Combine(destinationDir, file)} @: {DateTime.Now}", logBuilder);
+            new EventLog().Log($"None Exist File Deleted: {file} from: {Path.Combine(destinationDir, file)} @: {DateTime.Now}", logBuilder);
         }
 
     }

@@ -58,5 +58,17 @@ namespace BMW.Assessment.ReplicateForm.Properties {
                 this["IncludeSubdirectories"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DoNotDeleteDirectoriesFiles {
+            get {
+                return ((bool)(this["DoNotDeleteDirectoriesFiles"]));
+            }
+            set {
+                this["DoNotDeleteDirectoriesFiles"] = value;
+            }
+        }
     }
 }
