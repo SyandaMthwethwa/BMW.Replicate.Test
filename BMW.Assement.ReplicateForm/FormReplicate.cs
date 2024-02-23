@@ -55,8 +55,6 @@ namespace BMW.Assessment.ReplicateForm
             bool includeSubdirectories = includeSubdirectoriesCheckBox.Checked;
             bool donotdeletedirectoriesfiles = donotdeleteCheck.Checked;
 
-
-
             if (!Directory.Exists(sourceDir))
             {
                 MessageBox.Show("Source directory does not exist.");
@@ -64,7 +62,7 @@ namespace BMW.Assessment.ReplicateForm
             }
             if (!Directory.Exists(destinationDir) && includeSubdirectories)
             {
-                DialogResult dialogResult = MessageBox.Show("Destination directory does not exist. Do you want to to create directory?", "Replicate Form", MessageBoxButtons.YesNo);
+                DialogResult dialogResult = MessageBox.Show("Destination directory does not exist. Do you want to create directory?", "Replicate Form", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
                     Directory.CreateDirectory(destinationDir);
@@ -75,6 +73,11 @@ namespace BMW.Assessment.ReplicateForm
                 {
                     return;
                 }
+            }
+            if (!Directory.Exists(destinationDir) && !includeSubdirectories)
+            {
+                MessageBox.Show("Destination directory does not exist.");
+                return;
             }
 
             logBuilder.Clear();
